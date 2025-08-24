@@ -1,0 +1,247 @@
+Here is a **refined, detailed prompt** you can use to **guide development or instruct an AI assistant** (such as ChatGPT, Gemini, or others) to build the **SecuritaNova Antivirus Web Application**, with **Gemini AI integration**, **advanced graph reporting**, and a focus on **absolute precision in graphical output**.
+
+---
+
+## ✅ **SecuritaNova Antivirus Web Application — Comprehensive Development Prompt**
+
+### 🚀 **Project Overview**
+
+Develop **SecuritaNova**, a secure, modern, and responsive **web-based antivirus scanner**. The application allows users to upload various file types for thorough malware analysis, simulating antivirus functionalities through hash checks, heuristic scans, behavior analysis, and simulated sandboxing. The frontend uses **vanilla JavaScript** and **Tailwind CSS via CDN**, while the backend is built using **Python (Flask)** with an **SQLite** database. A final integration with **Gemini AI** will provide enhanced threat intelligence, and **interactive graphs (bar and line)** will be used to visualize scan results.
+
+---
+
+### 🧠 **AI Integration Requirement – Gemini AI**
+
+**Objective**: Enhance scan accuracy and provide intelligent insights on file behavior and risk scoring using **Gemini AI** (or an equivalent Google AI model/API).
+
+**Details**:
+
+* After internal simulated scans (hash check, behavior analysis, code analysis, etc.), send file metadata and scan summary (excluding actual file content) to **Gemini AI API**.
+* Input:
+
+  ```json
+  {
+    "file_name": "malicious_script.js",
+    "file_type": "JavaScript",
+    "hashes": {
+      "md5": "...",
+      "sha256": "..."
+    },
+    "sandbox_risk": "High",
+    "behavior_score": 85,
+    "code_analysis_findings": ["eval()", "document.write()"],
+    "lookup_result": "unknown"
+  }
+  ```
+* Gemini AI should analyze and return:
+
+  * Threat classification: `Safe`, `Suspicious`, `Malicious`.
+  * Risk explanation.
+  * Suggested remediation (if applicable).
+* Use Gemini's output as an **additional layer of decision-making** in the final result.
+* Display the Gemini AI decision in the final report.
+
+---
+
+### 📊 **Advanced Reporting with Graphs**
+
+Create **error-free, visually precise, and interactive graphs** using **HTML5 Canvas** and **vanilla JavaScript only** (no libraries like Chart.js).
+
+#### Requirements:
+
+* Use **Canvas API** to render:
+
+  * A **bar graph** comparing each scan module’s individual risk score (0–100 scale).
+  * A **line graph** showing file risk progression across the scan steps (e.g., after sandbox → behavior → code analysis → Gemini AI).
+* Ensure:
+
+  * Graphs are **fully responsive** using Tailwind breakpoints.
+  * X and Y axes are **clearly labeled**.
+  * Graphs are accessible (with `aria` labels).
+  * No graphical distortion regardless of device.
+  * Use Tailwind colors for consistency (e.g., `bg-blue-900`, `text-gray-900`, etc.).
+* Place these graphs in a collapsible section on the scan results page.
+* Export graphs as images for inclusion in downloadable reports (optional but recommended).
+
+---
+
+### 📁 **Core Functional Modules**
+
+Break down development into the following phases:
+
+#### 1. **File Upload Module**
+
+* Drag-and-drop upload area (`<div>` with JS drag/drop listeners).
+* Fallback "Browse" button.
+* Client-side validation for:
+
+  * File size < 500MB.
+  * Allowed file types.
+* Display file metadata (name, size, type).
+* Progress bar during upload (JS + Tailwind).
+* On success, redirect to scan.html with scan ID.
+
+#### 2. **Scan Pipeline (Backend & Real-time Feedback)**
+
+Perform the following **sequential scan phases** on backend with real-time frontend updates (via polling):
+
+1. **File Entry Check**
+
+   * Validate file signature & integrity.
+   * Store metadata in SQLite (`scan_logs` table).
+
+2. **Hashing**
+
+   * MD5 + SHA-256 using `hashlib`.
+   * Read in 4MB chunks.
+
+3. **Database Lookup**
+
+   * Compare against `file_hashes` table.
+   * Return `safe`, `malicious`, or `unknown`.
+
+4. **Simulated Sandbox Analysis**
+
+   * Check risky file types (.exe, .bat, etc.).
+   * Risk rating: Low, Medium, High.
+
+5. **Heuristic Behavior Analysis**
+
+   * Use regex rules to detect anomalies:
+
+     * Obfuscated file names.
+     * Type mismatches.
+     * Suspiciously large sizes.
+   * Risk score (0–100).
+
+6. **Static Code Analysis**
+
+   * Text-based: detect `eval()`, `exec()`, etc.
+   * Binary: detect corrupted headers.
+
+7. **Gemini AI Threat Insight**
+
+   * Send JSON summary of scan.
+   * Receive AI-evaluated risk status and reasoning.
+
+---
+
+### 📑 **Scan Results Page**
+
+Display all scan outputs in **structured cards** or **collapsible sections**:
+
+#### Elements:
+
+* **Metadata Summary** (file name, size, type, hash).
+* **Each Scan Module Section**:
+
+  * Outcome
+  * Explanation
+  * Visual tag: 🟢 Safe, 🟡 Suspicious, 🔴 Malicious.
+* **Graphical Report**:
+
+  * Bar chart of risk per scan.
+  * Line graph of cumulative risk.
+* **Gemini AI Analysis**:
+
+  * Final risk verdict.
+  * Reasoning.
+* **Download Report (.txt)**:
+
+  * Use Fetch API to download from `/report/:id`.
+  * Include timestamp in filename.
+
+---
+
+### 🔐 **Security Implementation**
+
+* Validate file server-side (magic bytes + extension match).
+* Store uploads in `/tmp/securitanova_uploads`.
+* Filenames: `uuid4().hex` to avoid traversal.
+* Delete after scan or timeout (10 mins via background thread).
+* SQLite queries: use `?` parameterization only.
+* Limit `/upload` to 5 requests/minute per IP (Flask-limiter or custom).
+* CSRF protection on all POST routes.
+
+---
+
+### 📁 **Project File Structure**
+
+```
+SecuritaNova/
+├── app.py
+├── utils/
+│   ├── scanner.py
+│   └── db.py
+├── db/
+│   ├── database.sql
+│   └── populate_sample.py
+├── templates/
+│   ├── index.html
+│   └── scan.html
+├── static/
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       └── main.js
+├── logs/
+│   └── securitanova.log
+├── tests/
+│   └── test_scanner.py
+├── README.md
+└── docs/
+    └── scanning.md
+```
+
+---
+
+### 📦 **Deployment Guide**
+
+* **Development**: `python app.py`
+* **Production**: `gunicorn --workers 4 app:app`
+* **Dependencies**: Python 3.8+, Flask, sqlite3
+* HTTPS handled externally (e.g., Nginx reverse proxy).
+
+---
+
+### 🧪 **Testing**
+
+* Unit tests:
+
+  * Hashing
+  * DB lookups
+  * Simulated scans
+* Manual tests:
+
+  * Upload `.txt`, `.exe`, `.zip`, `.js`
+  * Test large file (499MB) and invalid file (>500MB)
+* Graph rendering accuracy on various screen sizes.
+
+---
+
+### 📌 **Constraints**
+
+* No React, jQuery, TypeScript, or third-party JS libraries.
+* Tailwind CSS via CDN only.
+* SQLite as the only database.
+* Simulated AV logic only.
+* Gemini AI used for enhanced context-based verdicts — **not for full sandboxing**.
+* Graphs must be **100% pixel-perfect, error-free, responsive**, and work across all screen sizes.
+
+---
+
+### 📈 Future Enhancements (Optional)
+
+* Integrate VirusTotal for real-world hash validation.
+* Enable authenticated scan history.
+* Add WebSocket support for live scan updates.
+* Support bulk file uploads.
+* Build admin dashboard to manage hash database.
+
+---
+
+If you're using this with **an AI assistant**, you can conclude your instruction like this:
+
+> **"Use the above as the full system prompt to develop the entire SecuritaNova antivirus web application. Start by generating the frontend structure (index.html and scan.html) with Tailwind styling, then build backend routes (Flask) and connect the SQLite database. Integrate Gemini AI for intelligent threat analysis and render pixel-perfect advanced bar and line graphs using vanilla JS Canvas API. Every aspect must be secure, performant, and precise. Build it module by module and confirm each output."**
+
+Let me know if you want me to **start generating code for this** module by module, beginning with the UI, API routes, or the graph engine.

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Results - SecuritaNova</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen">
+    <!-- Header -->
+    <header class="bg-black/20 backdrop-blur-sm border-b border-purple-500/20">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                        <i data-feather="shield" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">SecuritaNova</h1>
+                        <p class="text-sm text-purple-300">Scan Results</p>
+                    </div>
+                </div>
+                <a href="/" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-300">
+                    <i data-feather="arrow-left" class="w-4 h-4 inline mr-2"></i>
+                    New Scan
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Scan Progress -->
+        <div id="scanProgress" class="max-w-4xl mx-auto mb-8">
+            <div class="bg-white/5 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div id="scanSpinner" class="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <i id="scanComplete" data-feather="check" class="w-8 h-8 text-white hidden"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Scanning File...</h2>
+                    <p id="scanStageText" class="text-purple-200 mb-4">Initializing security scan</p>
+                </div>
+                
+                <div class="w-full bg-purple-900/50 rounded-full h-4 mb-4">
+                    <div id="scanProgressBar" class="bg-gradient-to-r from-purple-500 to-blue-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                
+                <div class="flex justify-center">
+                    <span id="scanPercentage" class="text-purple-300 font-semibold">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scan Results -->
+        <div id="scanResults" class="max-w-6xl mx-auto hidden">
+            <!-- Overall Threat Assessment -->
+            <div class="bg-white/5 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8 mb-8">
+                <h2 class="text-3xl font-bold text-white mb-6 flex items-center">
+                    <i data-feather="shield-check" class="w-8 h-8 mr-3"></i>
+                    Threat Assessment
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <div id="threatLevel" class="text-6xl font-bold mb-2">SAFE</div>
+                        <div id="threatDescription" class="text-xl text-purple-200 mb-4">No threats detected</div>
+                        <div id="fileMetadata" class="space-y-2 text-sm text-purple-300">
+                            <div><span class="font-semibold">File:</span> <span id="fileName">-</span></div>
+                            <div><span class="font-semibold">Size:</span> <span id="fileSize">-</span></div>
+                            <div><span class="font-semibold">Type:</span> <span id="fileType">-</span></div>
+                            <div><span class="font-semibold">Scan ID:</span> <span id="scanId">{{ scan_id }}</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-center">
+                        <div id="threatIndicator" class="w-32 h-32 rounded-full flex items-center justify-center">
+                            <i data-feather="shield" class="w-16 h-16"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-4 mb-8 justify-center">
+                <button id="downloadReportBtn" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
+                    <i data-feather="download" class="w-5 h-5 inline mr-2"></i>
+                    Download Report
+                </button>
+                
+                <button id="toggleGraphsBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300">
+                    <i data-feather="bar-chart-2" class="w-5 h-5 inline mr-2"></i>
+                    View Analysis Graphs
+                </button>
+                
+                <button id="toggleDetailsBtn" class="bg-slate-600 hover:bg-slate-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300">
+                    <i data-feather="list" class="w-5 h-5 inline mr-2"></i>
+                    Detailed Results
+                </button>
+            </div>
+
+            <!-- Analysis Graphs -->
+            <div id="analysisGraphs" class="bg-white/5 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8 mb-8 hidden">
+                <h3 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <i data-feather="trending-up" class="w-6 h-6 mr-3"></i>
+                    Risk Analysis Visualization
+                </h3>
+                
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="text-lg font-semibold text-white mb-4">Risk Score by Module</h4>
+                        <div class="bg-white/10 rounded-lg p-4">
+                            <canvas id="riskBarChart" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold text-white mb-4">Scan Progression</h4>
+                        <div class="bg-white/10 rounded-lg p-4">
+                            <canvas id="progressLineChart" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Scan Results -->
+            <div id="detailedResults" class="space-y-6 hidden">
+                <!-- File Validation -->
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-white flex items-center">
+                            <i data-feather="file-check" class="w-5 h-5 mr-2"></i>
+                            File Validation
+                        </h3>
+                        <span id="validationStatus" class="px-3 py-1 rounded-full text-sm font-medium">Checking...</span>
+                    </div>
+                    <div id="validationDetails" class="text-purple-200"></div>
+                </div>
+
+                <!-- Hash Analysis -->
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-white flex items-center">
+                            <i data-feather="hash" class="w-5 h-5 mr-2"></i>
+                            Hash Analysis
+                        </h3>
+                        <span id="hashStatus" class="px-3 py-1 rounded-full text-sm font-medium">Computing...</span>
+                    </div>
+                    <div id="hashDetails" class="space-y-2 text-sm text-purple-200"></div>
+                </div>
+
+                <!-- Database Lookup -->
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-white flex items-center">
+                            <i data-feather="database" class="w-5 h-5 mr-2"></i>
+                            Threat Database Lookup
+                        </h3>
+                        <span id="databaseStatus" class="px-3 py-1 rounded-full text-sm font-medium">Searching...</span>
+                    </div>
+                    <div id="databaseDetails" class="text-purple-200"></div>
+                </div>
+
+                <!-- Sandbox Analysis -->
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-white flex items-center">
+                            <i data-feather="box" class="w-5 h-5 mr-2"></i>
+                            Sandbox Analysis
+                        </h3>
+                        <span id="sandboxStatus" class="px-3 py-1 rounded-full text-sm font-medium">Running...</span>
+                    </div>
+                    <div id="sandboxDetails" class="text-purple-200"></div>
+                </div>
+
+                <!-- Heuristic Analysis -->
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-white flex items-center">
+                            <i data-feather="search" class="w-5 h-5 mr-2"></i>
+                            Heuristic Analysis
+                        </h3>
+                        <span id="heuristicStatus" class="px-3 py-1 rounded-full text-sm font-medium">Analyzing...</span>
+                    </div>
+                    <div id="heuristicDetails" class="text-purple-200"></div>
+                </div>
+
+                <!-- Code Analysis -->
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-white flex items-center">
+                            <i data-feather="code" class="w-5 h-5 mr-2"></i>
+                            Static Code Analysis
+                        </h3>
+                        <span id="codeStatus" class="px-3 py-1 rounded-full text-sm font-medium">Scanning...</span>
+                    </div>
+                    <div id="codeDetails" class="text-purple-200"></div>
+                </div>
+
+                <!-- Gemini AI Analysis -->
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-white flex items-center">
+                            <i data-feather="cpu" class="w-5 h-5 mr-2"></i>
+                            Gemini AI Analysis
+                        </h3>
+                        <span id="geminiStatus" class="px-3 py-1 rounded-full text-sm font-medium">Processing...</span>
+                    </div>
+                    <div id="geminiDetails" class="text-purple-200"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/graphs.js') }}"></script>
+    <script>
+        feather.replace();
+        
+        // Initialize scan monitoring
+        const scanId = '{{ scan_id }}';
+        if (scanId) {
+            startScanMonitoring(scanId);
+        }
+    </script>
+</body>
+</html>
