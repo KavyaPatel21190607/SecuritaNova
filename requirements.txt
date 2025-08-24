@@ -1,0 +1,7 @@
+Flask==3.1.2
+Werkzeug     # (Flask’s dependency; will be installed automatically with Flask unless you explicitly need a specific version)
+python-magic
+google-genai
+pydantic
+gunicorn==23.0.0
+python-dotenv==1.1.1
